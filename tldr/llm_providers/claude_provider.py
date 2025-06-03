@@ -27,14 +27,14 @@ class ClaudeProvider(LLMProvider):
     def generate_summary(self, file_path: str, file_content: str, signatures: str) -> LLMResponse:
         """Generate a file summary using Claude"""
         prompt = self._build_summary_prompt(file_path, file_content, signatures)
-        return self._make_api_call(prompt)
+        return self._make_api_call(prompt, max_tokens=200)
     
-    def _make_api_call(self, prompt: str) -> LLMResponse:
+    def _make_api_call(self, prompt: str, max_tokens: int) -> LLMResponse:
         """Make the actual API call to Claude"""
         try:
             response = self.client.messages.create(
                 model=self.model,
-                max_tokens=200,  # Keep summaries concise
+                max_tokens=max_tokens,  # Use the passed parameter with default 200
                 temperature=0.3,  # Low temperature for consistent technical summaries
                 messages=[{"role": "user", "content": prompt}]
             )

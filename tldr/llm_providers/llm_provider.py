@@ -38,7 +38,7 @@ class LLMProvider(ABC):
         pass
     
     @abstractmethod
-    def _make_api_call(self, prompt: str) -> LLMResponse:
+    def _make_api_call(self, prompt: str, max_tokens: int) -> LLMResponse:
         """Make the actual API call to the LLM provider"""
         pass
     

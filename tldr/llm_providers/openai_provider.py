@@ -29,13 +29,13 @@ class OpenAIProvider(LLMProvider):
         prompt = self._build_summary_prompt(file_path, file_content, signatures)
         return self._make_api_call(prompt)
     
-    def _make_api_call(self, prompt: str) -> LLMResponse:
+    def _make_api_call(self, prompt: str, max_tokens: int) -> LLMResponse:
         """Make the actual API call to OpenAI"""
         try:
             response = self.client.chat.completions.create(
                 model=self.model,
                 messages=[{"role": "user", "content": prompt}],
-                max_tokens=200,  # Keep summaries concise
+                max_tokens=max_tokens,  # Keep summaries concise
                 temperature=0.3  # Low temperature for consistent technical summaries
             )
             

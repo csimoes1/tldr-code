@@ -79,7 +79,7 @@ if __name__ == '__main__':
         #
         # filename = sys.argv[1]
         # filename = "/Users/csimoes/Projects/Python/conductor/app/processor/base_processor.py"
-        filename = "/Users/csimoes/IdeaProjects/Amazon/AmazonScraper/adtrimmer-core/src/main/java/org/simoes/app/AutoBidder8.java"
+        filename = "/Users/csimoes/Projects/Python/tldr/tldr/TLDRFileCreator.py"
         a = SignatureExtractor()
         signatures = a.get_signatures(filename)
         logging.info(f"Extracted signatures: {signatures}")
