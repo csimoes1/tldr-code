@@ -79,7 +79,7 @@ if __name__ == '__main__':
         #
         # filename = sys.argv[1]
         # filename = "/Users/csimoes/Projects/Python/conductor/app/processor/base_processor.py"
-        filename = "/Users/csimoes/Projects/Python/tldr/tldr/simple_class.py"
+        filename = "/Users/csimoes/Projects/Python/tldr/tldr/llm_providers/claude_provider.py"
         a = SignatureExtractor()
         signatures = a.get_signatures(filename)
         logging.info(f"Extracted signatures: {signatures}")

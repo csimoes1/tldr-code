@@ -29,7 +29,7 @@ class ClaudeProvider(LLMProvider):
         prompt = self._build_summary_prompt(file_path, file_content, signatures)
         return self._make_api_call(prompt, max_tokens=200)
     
-    def _make_api_call(self, prompt: str, max_tokens: int) -> LLMResponse:
+    def _make_api_call(self, prompt: str, max_tokens: int = 200) -> LLMResponse:
         """Make the actual API call to Claude"""
         try:
             response = self.client.messages.create(

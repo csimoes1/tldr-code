@@ -36,6 +36,7 @@ class LLMConfig:
         env_var_map = {
             'claude': 'ANTHROPIC_API_KEY',
             'openai': 'OPENAI_API_KEY',
+            'grok': 'GROK_API_KEY',
         }
         
         provider_lower = provider.lower()
@@ -85,6 +86,7 @@ class LLMConfig:
         return {
             'claude': 'ANTHROPIC_API_KEY',
             'openai': 'OPENAI_API_KEY',
+            'grok': 'GROK_API_KEY',
         }
     
     @staticmethod
@@ -101,6 +103,7 @@ class LLMConfig:
         print("\nExample usage:")
         print("  python TLDRFileCreator.py ./src --llm claude")
         print("  python TLDRFileCreator.py ./src --llm openai")
+        print("  python TLDRFileCreator.py ./src --llm grok")
     
     def validate(self) -> bool:
         """

@@ -31,6 +31,12 @@ class LLMFactory:
                 cls._providers['openai'] = OpenAIProvider
             except ImportError as e:
                 logging.warning(f"OpenAI provider not available: {e}")
+            
+            try:
+                from .grok_provider import GrokProvider
+                cls._providers['grok'] = GrokProvider
+            except ImportError as e:
+                logging.warning(f"Grok provider not available: {e}")
     
     @classmethod
     def create_provider(cls, provider_name: str, api_key: str, model: str = None) -> LLMProvider:

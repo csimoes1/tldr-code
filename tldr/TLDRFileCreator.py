@@ -17,7 +17,7 @@ import tempfile
 import shutil
 from datetime import datetime
 from pathlib import Path
-from signature_extractor import SignatureExtractor
+from signature_extractor_llm import SignatureExtractorLLM
 from pygments.lexers import get_lexer_for_filename
 from pygments.util import ClassNotFound
 from llm_providers import LLMFactory, LLMConfig
@@ -26,7 +26,7 @@ from llm_providers import LLMFactory, LLMConfig
 
 class TLDRFileCreator:
     def __init__(self, llm_provider: str = None):
-        self.signature_extractor = SignatureExtractor()
+        self.signature_extractor = SignatureExtractorLLM()
         self.llm_provider = None
         
         # Lexers to exclude (non-programming languages)

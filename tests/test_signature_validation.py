@@ -15,7 +15,7 @@ from pathlib import Path
 # Add parent directory to path to import tldr modules
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'tldr'))
 
-from tldr.signature_extractor import SignatureExtractor
+from tldr.signature_extractor_llm import SignatureExtractorLLM
 from tldr.llm_providers import LLMFactory, LLMConfig
 
 
@@ -24,11 +24,11 @@ class TestSignatureValidation:
     
     def setup_method(self):
         """Setup test method - initialize signature extractor"""
-        self.signature_extractor = SignatureExtractor()
+        self.signature_extractor = SignatureExtractorLLM()
         
         # Try to initialize LLM provider from environment
         self.llm_provider = None
-        for provider_name in ['claude', 'openai']:
+        for provider_name in ['grok']:
             try:
                 config = LLMConfig.from_env(provider_name)
                 self.llm_provider = LLMFactory.create_provider(
@@ -193,16 +193,16 @@ Be thorough and precise in your analysis."""
         #     '/Users/csimoes/IdeaProjects/Amazon/AmazonScraper/adtrimmer-core/src/main/java/org/simoes/BodhiDogFixer.java'
         # ]
         test_files = [
-            # os.path.join(os.path.dirname(__file__), '..', 'tldr', 'signature_extractor.py'),
+            os.path.join(os.path.dirname(__file__), '..', 'tldr', 'signature_extractor.py'),
             os.path.join(os.path.dirname(__file__), '..', 'tldr', 'TLDRFileCreator.py'),
         ]
         
         # Add LLM provider files if they exist
-        # llm_dir = os.path.join(os.path.dirname(__file__), '..', 'tldr', 'llm_providers')
-        # for filename in ['llm_factory.py', 'llm_config.py', 'claude_provider.py', 'openai_provider.py']:
-        #     filepath = os.path.join(llm_dir, filename)
-        #     if os.path.exists(filepath):
-        #         test_files.append(filepath)
+        llm_dir = os.path.join(os.path.dirname(__file__), '..', 'tldr', 'llm_providers')
+        for filename in ['llm_factory.py', 'llm_config.py', 'claude_provider.py', 'openai_provider.py']:
+            filepath = os.path.join(llm_dir, filename)
+            if os.path.exists(filepath):
+                test_files.append(filepath)
         
         results = []
         for test_file in test_files:
