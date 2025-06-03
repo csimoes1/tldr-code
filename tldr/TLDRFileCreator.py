@@ -12,6 +12,9 @@ import logging_setup
 import os
 import sys
 import logging
+import json
+import tempfile
+import shutil
 from datetime import datetime
 from pathlib import Path
 from signature_extractor import SignatureExtractor
@@ -59,7 +62,7 @@ class TLDRFileCreator:
             
         # Set default output filename if not provided
         if output_filename is None:
-            output_filename = os.path.join(directory_path, 'tldr.md')
+            output_filename = os.path.join(directory_path, 'tldr.json')
         
         # Get absolute path for the directory
         abs_directory_path = os.path.abspath(directory_path)
@@ -74,63 +77,62 @@ class TLDRFileCreator:
         # Sort files for consistent output
         files.sort()
         
-        # Generate the markdown content
-        content = self._generate_markdown_content(abs_directory_path, files)
+        # Generate the JSON content
+        content = self._generate_json_content(abs_directory_path, files)
         
-        # Write to output file
-        with open(output_filename, 'w', encoding='utf-8') as f:
-            f.write(content)
+        # Write atomically using temporary file
+        self._write_json_atomically(content, output_filename)
             
         print(f"TLDR file created: {output_filename}")
         
-    def _generate_markdown_content(self, directory_path, files):
+    def _generate_json_content(self, directory_path, files):
         """
-        Generates the markdown content for the TLDR file.
+        Generates the JSON content for the TLDR file.
         
         Args:
             directory_path (str): Absolute path to the directory
             files (list): List of file paths to process
             
         Returns:
-            str: Generated markdown content
+            dict: Generated JSON content
         """
         # Current timestamp
         timestamp = datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')
         
-        # Start building the markdown content
-        content = []
-        content.append("# File Markdown Summary")
-        content.append(f"## Directory Path: `{directory_path}`")
-        content.append("")
+        # Start building the JSON structure
+        json_data = {
+            "directory_path": directory_path,
+            "last_updated": timestamp,
+            "files": []
+        }
         
         # Process each file
         for file_path in files:
             abs_file_path = os.path.abspath(file_path)
-            relative_file_path = os.path.relpath(abs_file_path, start=os.path.dirname(directory_path))
             
-            content.append(f"## File Path: `{abs_file_path}`")
-            content.append(f"#### Last scanned: '{timestamp}'")
-
             # Extract signatures using signature_extractor
             try:
-                signatures = self.signature_extractor.get_signatures(file_path)
+                signatures_text = self.signature_extractor.get_signatures(file_path)
+                signatures_list = self._parse_signatures(signatures_text)
             except Exception as e:
                 logging.warning(f"Could not extract signatures from {file_path}: {e}")
-                content.append(f"Error extracting signatures: {e}")
+                signatures_list = [f"Error extracting signatures: {e}"]
                 raise
 
             # Generate AI-powered summary if LLM provider is available
             logging.debug(f"Generating file summary from LLM for {file_path}")
-            summary = self._generate_file_summary(file_path, signatures)
+            summary = self._generate_file_summary(file_path, signatures_text)
 
-            content.append("")
-            content.append("### File Summary:")
-            content.append(summary)
-            content.append("")
-            content.append("### Signatures:")
-            content.append(signatures.strip())
+            file_data = {
+                "file_path": abs_file_path,
+                "last_scanned": timestamp,
+                "signatures": signatures_list,
+                "summary": summary
+            }
+            
+            json_data["files"].append(file_data)
 
-        return "\n".join(content)
+        return json_data
 
     def _is_programming_file(self, file_path):
         """
@@ -197,6 +199,86 @@ class TLDRFileCreator:
             logging.error(f"Failed to generate summary for {file_path}: {e}")
             raise
 
+    def _parse_signatures(self, signatures_text: str) -> list:
+        """
+        Parse signatures text into a list of individual signatures.
+        
+        Args:
+            signatures_text (str): Raw signatures text from signature extractor
+            
+        Returns:
+            list: List of individual signatures
+        """
+        if not signatures_text or not signatures_text.strip():
+            return []
+        
+        # Split by lines and clean up
+        lines = signatures_text.strip().split('\n')
+        signatures = []
+        
+        for line in lines:
+            line = line.strip()
+            if line and not line.startswith('#') and not line.startswith('//'):
+                # Remove markdown formatting if present
+                if line.startswith('- '):
+                    line = line[2:]
+                elif line.startswith('* '):
+                    line = line[2:]
+                
+                # Remove code block markers if present
+                if line.startswith('```') or line.endswith('```'):
+                    continue
+                    
+                signatures.append(line)
+        
+        return signatures
+
+    def _write_json_atomically(self, content: dict, output_filename: str):
+        """
+        Write JSON content atomically using temporary file and move operation.
+        
+        This ensures that readers never see a partially written file, and the
+        operation is atomic on most filesystems.
+        
+        Args:
+            content (dict): JSON content to write
+            output_filename (str): Final output file path
+        """
+        # Get directory for temporary file (same as target for atomic move)
+        output_dir = os.path.dirname(os.path.abspath(output_filename))
+        
+        # Create temporary file in the same directory as target
+        temp_fd, temp_path = tempfile.mkstemp(
+            suffix='.json.tmp', 
+            prefix='tldr_',
+            dir=output_dir
+        )
+        
+        try:
+            # Write to temporary file
+            with os.fdopen(temp_fd, 'w', encoding='utf-8') as f:
+                json.dump(content, f, indent=2, ensure_ascii=False)
+                f.flush()
+                os.fsync(f.fileno())  # Force write to disk
+            
+            # Atomic move (on most filesystems)
+            if os.name == 'nt':  # Windows
+                # Windows doesn't allow atomic replace of existing files
+                if os.path.exists(output_filename):
+                    os.unlink(output_filename)
+            
+            shutil.move(temp_path, output_filename)
+            logging.debug(f"Atomically wrote JSON to {output_filename}")
+            
+        except Exception as e:
+            # Clean up temporary file if something goes wrong
+            try:
+                if os.path.exists(temp_path):
+                    os.unlink(temp_path)
+            except:
+                pass
+            raise Exception(f"Failed to write JSON file atomically: {e}")
+
 
 def main():
     """
@@ -204,9 +286,9 @@ def main():
     """
     import argparse
     
-    parser = argparse.ArgumentParser(description='Create TLDR markdown files for directories')
+    parser = argparse.ArgumentParser(description='Create TLDR JSON files for directories')
     parser.add_argument('directory_path', help='Path to the directory to scan')
-    parser.add_argument('output_filename', nargs='?', help='Optional output filename (defaults to tldr.md)')
+    parser.add_argument('output_filename', nargs='?', help='Optional output filename (defaults to tldr.json)')
     parser.add_argument('--llm', choices=LLMFactory.available_providers(), 
                        help='LLM provider to use for generating summaries')
     parser.add_argument('--setup-llm', action='store_true', 
@@ -220,9 +302,6 @@ def main():
         return
     
     try:
-        print("API Key:", os.environ.get("ANTHROPIC_API_KEY"))
-        from anthropic import Anthropic
-        client = Anthropic()
         creator = TLDRFileCreator(llm_provider=args.llm)
         creator.create_tldr_file(args.directory_path, args.output_filename)
     except Exception as e:
