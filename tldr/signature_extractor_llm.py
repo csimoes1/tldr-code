@@ -82,10 +82,12 @@ class SignatureExtractorLLM:
             
             # Create the extraction prompt
             prompt = self._build_signature_extraction_prompt(filename, file_content, language)
-            
+            logging.debug(f"Generated prompt for {filename}:\n{prompt}")
+
             # Get LLM response
             response = self.llm_provider._make_api_call(prompt, max_tokens=2000)
-            
+            logging.debug(f"LLM response for {filename}:\n{response.content}")
+
             # Extract and clean the signatures from the response
             signatures = self._parse_llm_response(response.content)
             
@@ -275,8 +277,9 @@ if __name__ == '__main__':
         Main function to test LLM signature extraction
         """
         # Test file path
-        filename = "/Users/csimoes/Projects/Python/tldr/tldr/llm_providers/claude_provider.py"
-        
+        # filename = "/Users/csimoes/Projects/Python/tldr/tldr/llm_providers/claude_provider.py"
+        filename = "/Users/csimoes/IdeaProjects/Amazon/AmazonScraper/adtrimmer-webapp/src/main/java/org/simoes/auth/AuthFilter.java"
+
         try:
             extractor = SignatureExtractorLLM()
             signatures = extractor.get_signatures(filename)
