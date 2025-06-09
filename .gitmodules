@@ -1,3 +1,0 @@
-[submodule "submodule/pygments"]
-	path = submodule/pygments
-	url = https://github.com/csimoes1/pygments

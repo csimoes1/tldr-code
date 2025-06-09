@@ -10,10 +10,6 @@ import os
 import sys
 import logging
 import pytest
-from pathlib import Path
-
-# Add parent directory to path to import tldr modules
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'tldr'))
 
 from tldr.signature_extractor_llm import SignatureExtractorLLM
 from tldr.llm_providers import LLMFactory, LLMConfig

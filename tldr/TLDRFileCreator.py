@@ -18,8 +18,8 @@ import shutil
 from datetime import datetime
 from pathlib import Path
 from signature_extractor_pygments import SignatureExtractor
-from pygments.lexers import get_lexer_for_filename
-from pygments.util import ClassNotFound
+from pygments_tldr.lexers import get_lexer_for_filename
+from pygments_tldr.util import ClassNotFound
 from llm_providers import LLMFactory, LLMConfig
 
 class TLDRFileCreator:

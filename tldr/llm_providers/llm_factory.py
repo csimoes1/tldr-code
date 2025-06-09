@@ -26,11 +26,11 @@ class LLMFactory:
             except ImportError as e:
                 logging.warning(f"Claude provider not available: {e}")
             
-            try:
-                from .openai_provider import OpenAIProvider
-                cls._providers['openai'] = OpenAIProvider
-            except ImportError as e:
-                logging.warning(f"OpenAI provider not available: {e}")
+            # try:
+            #     from .openai_provider import OpenAIProvider
+            #     cls._providers['openai'] = OpenAIProvider
+            # except ImportError as e:
+            #     logging.warning(f"OpenAI provider not available: {e}")
             
             try:
                 from .grok_provider import GrokProvider

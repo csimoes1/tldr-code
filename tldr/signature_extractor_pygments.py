@@ -2,10 +2,10 @@ import logging_setup
 import logging
 import os
 
-from pygments import highlight
-from pygments.formatters.tldr import TLDRFormatter
-from pygments.lexers import get_lexer_for_filename, get_lexer_by_name
-from pygments.util import ClassNotFound
+from pygments_tldr import highlight
+from pygments_tldr.formatters.tldr import TLDRFormatter
+from pygments_tldr.lexers import get_lexer_for_filename, get_lexer_by_name
+from pygments_tldr.util import ClassNotFound
 
 
 class SignatureExtractor():
