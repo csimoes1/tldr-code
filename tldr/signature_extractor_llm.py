@@ -278,7 +278,7 @@ if __name__ == '__main__':
         """
         # Test file path
         # filename = "/Users/csimoes/Projects/Python/tldr/tldr/llm_providers/claude_provider.py"
-        filename = "/Users/csimoes/IdeaProjects/Amazon/AmazonScraper/adtrimmer-webapp/src/main/java/org/simoes/auth/AuthFilter.java"
+        filename = "/Users/csimoes/IdeaProjects/Amazon/AmazonScraper/adtrimmer-webapp/src/main/java/org/simoes"
 
         try:
             extractor = SignatureExtractorLLM()

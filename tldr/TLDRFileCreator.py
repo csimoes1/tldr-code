@@ -17,16 +17,14 @@ import tempfile
 import shutil
 from datetime import datetime
 from pathlib import Path
-from signature_extractor_llm import SignatureExtractorLLM
+from signature_extractor_pygments import SignatureExtractor
 from pygments.lexers import get_lexer_for_filename
 from pygments.util import ClassNotFound
 from llm_providers import LLMFactory, LLMConfig
 
-##TODO: START HERE: def __init()__ not being recognized by pygments as a constructor
-
 class TLDRFileCreator:
     def __init__(self, llm_provider: str = None):
-        self.signature_extractor = SignatureExtractorLLM()
+        self.signature_extractor = SignatureExtractor()
         self.llm_provider = None
         
         # Lexers to exclude (non-programming languages)
@@ -107,14 +105,15 @@ class TLDRFileCreator:
     
     def _process_directories_recursively(self, root_directory, base_output_filename):
         """
-        Process directories recursively, creating a TLDR file for each directory
-        that contains programming files.
+        Process directories recursively, creating one large TLDR file in the base directory
+        with information for all directories that contain programming files.
         
         Args:
             root_directory (str): Root directory to start from
-            base_output_filename (str): Base output filename (ignored in recursive mode)
+            base_output_filename (str): Base output filename (used for the single output file)
         """
         processed_count = 0
+        all_directories = []
         
         # Walk through all directories
         for root, dirs, filenames in os.walk(root_directory):
@@ -125,25 +124,45 @@ class TLDRFileCreator:
                 if self._is_programming_file(item_path):
                     programming_files.append(item_path)
             
-            # Only create TLDR file if directory has programming files
+            # Only process directory if it has programming files
             if programming_files:
                 # Sort files for consistent output
                 programming_files.sort()
                 
-                # Generate output filename for this directory
-                output_filename = os.path.join(root, 'tldr.json')
-                
-                # Generate the JSON content
+                # Generate the JSON content for this directory
                 abs_directory_path = os.path.abspath(root)
-                content = self._generate_json_content(abs_directory_path, programming_files)
+                directory_content = self._generate_json_content(abs_directory_path, programming_files)
+                all_directories.append(directory_content)
                 
-                # Write atomically using temporary file
-                self._write_json_atomically(content, output_filename)
-                
-                print(f"TLDR file created: {output_filename}")
+                print(f"Processed directory: {abs_directory_path}")
                 processed_count += 1
         
-        print(f"Recursive processing complete. Created {processed_count} TLDR files.")
+        # Create the combined JSON structure
+        if all_directories:
+            # Set default output filename if not provided
+            if base_output_filename is None:
+                output_filename = os.path.join(root_directory, 'tldr_combined.json')
+            else:
+                # Ensure the output file is in the base directory
+                if not os.path.isabs(base_output_filename):
+                    output_filename = os.path.join(root_directory, base_output_filename)
+                else:
+                    output_filename = base_output_filename
+            
+            timestamp = datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')
+            combined_content = {
+                "root_directory": os.path.abspath(root_directory),
+                "last_updated": timestamp,
+                "total_directories_processed": processed_count,
+                "directories": all_directories
+            }
+            
+            # Write the combined file atomically
+            self._write_json_atomically(combined_content, output_filename)
+            
+            print(f"Combined TLDR file created: {output_filename}")
+        
+        print(f"Recursive processing complete. Processed {processed_count} directories into one file.")
         
     def _generate_json_content(self, directory_path, files):
         """
@@ -350,7 +369,7 @@ def main():
     parser.add_argument('directory_path', help='Path to the directory to scan')
     parser.add_argument('output_filename', nargs='?', help='Optional output filename (defaults to tldr.json)')
     parser.add_argument('-r', '--recursive', action='store_true',
-                       help='Process directories recursively, creating tldr.json in each directory with programming files')
+                       help='Process directories recursively, creating one combined tldr.json file in the base directory')
     parser.add_argument('--llm', choices=LLMFactory.available_providers(), 
                        help='LLM provider to use for generating summaries')
     parser.add_argument('--setup-llm', action='store_true', 
