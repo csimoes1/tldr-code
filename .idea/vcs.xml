@@ -3,5 +3,7 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/temp/InterviewAgent" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/tempReact/react" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/temp_linux/linux" vcs="Git" />
   </component>
 </project>

@@ -24,15 +24,52 @@ from urllib.parse import urlparse
 
 from TLDRFileCreator import TLDRFileCreator
 
+# Configure logging to write to both console and file
+def setup_logging():
+    """Setup logging configuration for github_adapter"""
+    log_dir = os.path.join(os.path.dirname(__file__), '..', 'logs')
+    os.makedirs(log_dir, exist_ok=True)
+    log_file = os.path.join(log_dir, 'github_adapter.log')
+    
+    # Create formatter
+    formatter = logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(funcName)s(): - %(message)s"
+    )
+    
+    # Get the root logger
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+    
+    # Remove existing handlers to avoid duplicates
+    for handler in logger.handlers[:]:
+        logger.removeHandler(handler)
+    
+    # Console handler
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(formatter)
+    logger.addHandler(console_handler)
+    
+    # File handler
+    file_handler = logging.FileHandler(log_file)
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+    
+    logging.info(f"Logging configured. Log file: {log_file}")
+
+# Setup logging when module is imported
+setup_logging()
+
 class GitHubAdapter:
-    def __init__(self, llm_provider: str = None):
+    def __init__(self, llm_provider: str = None, skip_file_summary: bool = False):
         """
         Initialize the GitHub adapter.
         
         Args:
             llm_provider (str): Optional LLM provider for generating summaries
+            skip_file_summary (bool): Skip generating file summaries using LLM
         """
         self.llm_provider = llm_provider
+        self.skip_file_summary = skip_file_summary
         
     def process_github_repo(self, github_url: str, output_dir: str = None, cleanup: bool = True, recursive: bool = True):
         """
@@ -82,7 +119,7 @@ class GitHubAdapter:
             tldr_filename = os.path.join(download_path, f"{repo_name}.tldr")
             logging.info(f"Creating TLDR file: {tldr_filename}")
             
-            creator = TLDRFileCreator(llm_provider=self.llm_provider)
+            creator = TLDRFileCreator(llm_provider=self.llm_provider, skip_file_summary=self.skip_file_summary)
             creator.create_tldr_file(download_path, tldr_filename, recursive=recursive)
             tldr_end = time.time()
             logging.info(f"TLDR file creation completed in {tldr_end - tldr_start:.2f} seconds")
@@ -218,11 +255,13 @@ def main():
     parser.add_argument('--no-recursive', action='store_true', help='Do not process subdirectories recursively')
     parser.add_argument('--llm', choices=LLMFactory.available_providers(), 
                        help='LLM provider to use for generating summaries')
+    parser.add_argument('--skip-file-summary', action='store_true',
+                       help='Skip generating file summaries using LLM')
     
     args = parser.parse_args()
     
     try:
-        adapter = GitHubAdapter(llm_provider=args.llm)
+        adapter = GitHubAdapter(llm_provider=args.llm, skip_file_summary=args.skip_file_summary)
         tldr_file = adapter.process_github_repo(
             github_url=args.github_url,
             output_dir=args.output_dir,

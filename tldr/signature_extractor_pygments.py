@@ -78,8 +78,8 @@ if __name__ == '__main__':
         #     return
         #
         # filename = sys.argv[1]
-        # filename = "/Users/csimoes/Projects/Python/conductor/app/processor/base_processor.py"
-        filename = "/Users/csimoes/Projects/Python/tldr/tldr/llm_providers/claude_provider.py"
+        filename = "/Users/csimoes/Projects/Python/conductor/app/processor/base_processor.py"
+        # filename = "/Users/csimoes/Projects/Python/tldr/tempReact/react/packages/react/src/ReactAct.js"
         a = SignatureExtractor()
         signatures = a.get_signatures(filename)
         logging.info(f"Extracted signatures: {signatures}")

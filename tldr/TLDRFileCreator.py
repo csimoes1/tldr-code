@@ -23,12 +23,13 @@ from pygments_tldr.util import ClassNotFound
 from llm_providers import LLMFactory, LLMConfig
 
 class TLDRFileCreator:
-    def __init__(self, llm_provider: str = None):
-        if llm_provider is None:
-            raise ValueError("llm_provider must be specified when initializing TLDRFileCreator")
+    def __init__(self, llm_provider: str = None, skip_file_summary: bool = False):
+        if llm_provider is None and not skip_file_summary:
+            raise ValueError("llm_provider must be specified when initializing TLDRFileCreator (unless skip_file_summary=True)")
             
         self.signature_extractor = SignatureExtractor()
         self.llm_provider = None
+        self.skip_file_summary = skip_file_summary
         
         # Lexers to exclude (non-programming languages)
         self.excluded_lexers = {
@@ -45,7 +46,8 @@ class TLDRFileCreator:
             'LogsLexer',          # Log files
         }
         
-        self._setup_llm_provider(llm_provider)
+        if not skip_file_summary:
+            self._setup_llm_provider(llm_provider)
         
     def create_tldr_file(self, directory_path, output_filename=None, recursive=False):
         """
@@ -211,9 +213,13 @@ class TLDRFileCreator:
                 signatures_list = [f"Error extracting signatures: {e}"]
                 raise
 
-            # Generate AI-powered summary if LLM provider is available
-            logging.debug(f"Generating file summary from LLM for {file_path}")
-            summary = self._generate_file_summary(file_path, signatures_text)
+            # Generate AI-powered summary if LLM provider is available and not skipped
+            if self.skip_file_summary:
+                logging.debug(f"Skipping file summary generation for {file_path}")
+                summary = "File summary generation skipped"
+            else:
+                logging.debug(f"Generating file summary from LLM for {file_path}")
+                summary = self._generate_file_summary(file_path, signatures_text)
 
             file_data = {
                 "file_path": abs_file_path,
@@ -332,7 +338,7 @@ class TLDRFileCreator:
             # Generate summary using LLM
             response = self.llm_provider.generate_summary(file_path, file_content, signatures)
             return response.content.strip()
-            
+
         except Exception as e:
             logging.error(f"Failed to generate summary for {file_path}: {e}")
             raise
@@ -431,6 +437,8 @@ def main():
                        help='Process directories recursively, creating one combined tldr.json file in the base directory')
     parser.add_argument('--llm', choices=LLMFactory.available_providers(), 
                        help='LLM provider to use for generating summaries')
+    parser.add_argument('--skip-file-summary', action='store_true',
+                       help='Skip generating file summaries using LLM')
     parser.add_argument('--setup-llm', action='store_true', 
                        help='Show LLM setup instructions')
     
@@ -442,7 +450,7 @@ def main():
         return
     
     try:
-        creator = TLDRFileCreator(llm_provider=args.llm)
+        creator = TLDRFileCreator(llm_provider=args.llm, skip_file_summary=args.skip_file_summary)
         creator.create_tldr_file(args.directory_path, args.output_filename, args.recursive)
     except Exception as e:
         print(f"Error: {e}")
