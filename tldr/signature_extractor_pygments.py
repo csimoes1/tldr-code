@@ -60,7 +60,7 @@ class SignatureExtractor():
             return result
 
         except Exception as e:
-            logging.error(f"Error processing file: {e}")
+            logging.error(f"Error processing file {filename}: {e}")
             raise
 
 

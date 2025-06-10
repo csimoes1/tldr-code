@@ -88,6 +88,9 @@ class TLDRFileCreator:
         # Collect files only in the current directory
         files = []
         for item in os.listdir(directory_path):
+            # Skip hidden files and temporary files
+            if item.startswith('.') or item.endswith('.tmp'):
+                continue
             item_path = os.path.join(directory_path, item)
             if os.path.isfile(item_path) and self._is_programming_file(item_path):
                 files.append(item_path)
@@ -117,9 +120,15 @@ class TLDRFileCreator:
         
         # Walk through all directories
         for root, dirs, filenames in os.walk(root_directory):
+            # Filter out hidden directories from dirs list to prevent os.walk from traversing them
+            dirs[:] = [d for d in dirs if not d.startswith('.')]
+            
             # Check if this directory has any programming files
             programming_files = []
             for filename in filenames:
+                # Skip hidden files and temporary files
+                if filename.startswith('.') or filename.endswith('.tmp'):
+                    continue
                 item_path = os.path.join(root, filename)
                 if self._is_programming_file(item_path):
                     programming_files.append(item_path)
@@ -141,13 +150,15 @@ class TLDRFileCreator:
         if all_directories:
             # Set default output filename if not provided
             if base_output_filename is None:
-                output_filename = os.path.join(root_directory, 'tldr_combined.json')
+                output_filename = 'tldr_combined.json'
+                # output_filename = os.path.join(root_directory, 'tldr_combined.json')
             else:
+                output_filename = base_output_filename
                 # Ensure the output file is in the base directory
-                if not os.path.isabs(base_output_filename):
-                    output_filename = os.path.join(root_directory, base_output_filename)
-                else:
-                    output_filename = base_output_filename
+                # if not os.path.isabs(base_output_filename):
+                #     output_filename = os.path.join(root_directory, base_output_filename)
+                # else:
+                #     output_filename = base_output_filename
             
             timestamp = datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')
             combined_content = {
@@ -215,7 +226,7 @@ class TLDRFileCreator:
 
     def _is_programming_file(self, file_path):
         """
-        Use Pygments to determine if file is a recognized programming language.
+        Check if file has a known programming extension and is recognized by Pygments.
         
         Args:
             file_path (str): Path to the file to check
@@ -223,6 +234,52 @@ class TLDRFileCreator:
         Returns:
             bool: True if file is a programming language, False otherwise
         """
+        # Common programming file extensions
+        programming_extensions = {
+            '.py', '.pyx', '.pyi',  # Python
+            '.js', '.jsx', '.ts', '.tsx', '.mjs', '.cjs',  # JavaScript/TypeScript
+            '.java', '.kt', '.kts',  # Java/Kotlin
+            '.c', '.h', '.cpp', '.hpp', '.cc', '.cxx', '.c++',  # C/C++
+            '.cs', '.vb',  # C#/VB.NET
+            '.php', '.php3', '.php4', '.php5', '.phtml',  # PHP
+            '.rb', '.rbw',  # Ruby
+            '.go',  # Go
+            '.rs',  # Rust
+            '.swift',  # Swift
+            '.m', '.mm',  # Objective-C
+            '.scala', '.sc',  # Scala
+            '.pl', '.pm', '.pod',  # Perl
+            '.sh', '.bash', '.zsh', '.fish',  # Shell scripts
+            '.ps1', '.psm1', '.psd1',  # PowerShell
+            '.r', '.R',  # R
+            '.matlab', '.m',  # MATLAB
+            '.lua',  # Lua
+            '.dart',  # Dart
+            '.ex', '.exs',  # Elixir
+            '.erl', '.hrl',  # Erlang
+            '.hs', '.lhs',  # Haskell
+            '.clj', '.cljs', '.cljc',  # Clojure
+            '.fs', '.fsx', '.fsi',  # F#
+            '.ml', '.mli',  # OCaml
+            '.pas', '.pp', '.inc',  # Pascal
+            '.ada', '.adb', '.ads',  # Ada
+            '.d',  # D
+            '.nim',  # Nim
+            '.crystal', '.cr',  # Crystal
+            '.zig',  # Zig
+            '.v',  # V
+            '.jl',  # Julia
+            '.groovy', '.gvy', '.gy', '.gsh',  # Groovy
+        }
+        
+        # Get file extension
+        _, ext = os.path.splitext(file_path.lower())
+        
+        # First check if it has a known programming extension
+        if ext not in programming_extensions:
+            logging.debug(f"Excluding file {file_path} (unknown programming extension: {ext})")
+            return False
+        
         try:
             lexer = get_lexer_for_filename(file_path)
             lexer_name = lexer.__class__.__name__
