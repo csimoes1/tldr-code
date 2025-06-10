@@ -18,6 +18,7 @@ import tempfile
 import shutil
 import subprocess
 import traceback
+import time
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -46,6 +47,9 @@ class GitHubAdapter:
         Returns:
             str: Path to the generated TLDR file
         """
+        start_time = time.time()
+        logging.info(f"Starting GitHub repository processing for: {github_url}")
+        
         # Validate GitHub URL
         if not self._is_valid_github_url(github_url):
             raise ValueError(f"Invalid GitHub URL: {github_url}")
@@ -65,17 +69,23 @@ class GitHubAdapter:
             should_cleanup_temp = False
         
         try:
+            download_start = time.time()
             logging.info(f"Downloading repository {github_url} to {download_path}")
             
             # Download the repository
             self._download_repo(github_url, download_path)
+            download_end = time.time()
+            logging.info(f"Repository download completed in {download_end - download_start:.2f} seconds")
             
             # Create TLDR file
+            tldr_start = time.time()
             tldr_filename = os.path.join(download_path, f"{repo_name}.tldr")
             logging.info(f"Creating TLDR file: {tldr_filename}")
             
             creator = TLDRFileCreator(llm_provider=self.llm_provider)
             creator.create_tldr_file(download_path, tldr_filename, recursive=recursive)
+            tldr_end = time.time()
+            logging.info(f"TLDR file creation completed in {tldr_end - tldr_start:.2f} seconds")
             
             # Copy TLDR file to output directory if using temp directory
             if should_cleanup_temp and output_dir:
@@ -83,12 +93,17 @@ class GitHubAdapter:
                 final_tldr_path = os.path.join(output_dir, f"{repo_name}.tldr")
                 shutil.copy2(tldr_filename, final_tldr_path)
                 logging.info(f"TLDR file copied to: {final_tldr_path}")
-                return final_tldr_path
+                final_result = final_tldr_path
             else:
-                return tldr_filename
+                final_result = tldr_filename
+            
+            total_time = time.time() - start_time
+            logging.info(f"GitHub repository processing completed in {total_time:.2f} seconds total")
+            return final_result
                 
         except Exception as e:
-            logging.error(f"Error processing repository {github_url}: {e}")
+            total_time = time.time() - start_time
+            logging.error(f"Error processing repository {github_url} after {total_time:.2f} seconds: {e}")
             raise
         finally:
             # Clean up temporary directory if requested

@@ -24,6 +24,9 @@ from llm_providers import LLMFactory, LLMConfig
 
 class TLDRFileCreator:
     def __init__(self, llm_provider: str = None):
+        if llm_provider is None:
+            raise ValueError("llm_provider must be specified when initializing TLDRFileCreator")
+            
         self.signature_extractor = SignatureExtractor()
         self.llm_provider = None
         
@@ -42,8 +45,7 @@ class TLDRFileCreator:
             'LogsLexer',          # Log files
         }
         
-        if llm_provider:
-            self._setup_llm_provider(llm_provider)
+        self._setup_llm_provider(llm_provider)
         
     def create_tldr_file(self, directory_path, output_filename=None, recursive=False):
         """
