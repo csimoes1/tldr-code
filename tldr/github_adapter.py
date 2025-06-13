@@ -116,7 +116,7 @@ class GitHubAdapter:
             
             # Create TLDR file
             tldr_start = time.time()
-            tldr_filename = os.path.join(download_path, f"{repo_name}.tldr")
+            tldr_filename = os.path.join(download_path, f"{repo_name}.tldr.json")
             logging.info(f"Creating TLDR file: {tldr_filename}")
             
             creator = TLDRFileCreator(llm_provider=self.llm_provider, skip_file_summary=self.skip_file_summary)

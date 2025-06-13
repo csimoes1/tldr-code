@@ -1,0 +1,34 @@
+Projects considered:
+Javascript:
+- React - too large (1G)
+- create-react-app - smaller (36M)
+
+Typescript:
+- vscode - too large (1.2G)
+
+Java:
+- spring-framework - too large (337M)
+- junit5 - smaller (766M)
+- OpenPDF - smaller (87M)
+
+Please grade me on how well the attached file captures the functions contained in the popular open source project found here:
+https://github.com/LibrePDF/OpenPDF
+Please grade me just on the capturing of function signatures for this project.
+
+Please grade me on how well the attached file captures the functions contained in the popular open source project found here:
+https://github.com/facebook/create-react-app
+Please grade me just on the capturing of function signatures for this project.
+
+Please grade me on how well the attached file captures the functions contained in the popular open source project found here:
+https://github.com/vitejs/vite
+Please grade me just on the capturing of function signatures for this project.
+
+
+Please grade me on how well the file OpenPDF.tldr.json captures the functions contained in the open source project found in this
+  directory.  Please grade me just on the capturing of function signatures from this project.
+
+Please grade me on how well the file create-react-app.tldr captures the functions contained in the open source project found in this
+  directory.  Please grade me just on the capturing of function signatures from this project.
+
+Please grade me on how well the file vite.tldr captures the functions contained in the open source project found in this directory.
+Please grade me just on the capturing of function signatures from this project.
