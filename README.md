@@ -5,11 +5,11 @@ TLDR is a Python tool that extracts function signatures from large codebases and
 ## Features
 
 - **Multi-language Support**: Supports 40+ programming languages via Pygments lexer integration
-- **AI-Powered Summaries**: Generates file summaries using LLM providers (Claude, OpenAI, Grok)
 - **Signature Extraction**: Extracts function, class, and method signatures from code files
 - **JSON Output**: Produces structured JSON output for easy integration with other tools
 - **Recursive Processing**: Can process entire directory trees recursively
 - **Atomic File Writing**: Ensures data integrity with atomic file operations
+- **(Optional) AI-Powered File Summaries**: Generates file summaries using LLM providers (Claude, OpenAI, Grok)
 
 ## Supported Languages
 
@@ -47,16 +47,16 @@ export GROK_API_KEY='your-api-key-here'
 
 ```bash
 # Process a single directory
-python tldr/TLDRFileCreator.py ./src
+python tldr/tldr_file_creator.py ./src
 
 # Specify output filename
-python tldr/TLDRFileCreator.py ./src my_summary.json
+python tldr/tldr_file_creator.py ./src my_summary.json
 
 # Process recursively with AI summaries
-python tldr/TLDRFileCreator.py ./src --recursive --llm claude
+python tldr/tldr_file_creator.py ./src --recursive --llm claude
 
 # Skip AI summaries (signatures only)
-python tldr/TLDRFileCreator.py ./src --skip-file-summary
+python tldr/tldr_file_creator.py ./src --skip-file-summary
 ```
 
 ### Command Line Options

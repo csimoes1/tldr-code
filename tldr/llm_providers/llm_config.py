@@ -101,9 +101,9 @@ class LLMConfig:
             print(f"  export {env_var}='your-api-key-here'")
         
         print("\nExample usage:")
-        print("  python TLDRFileCreator.py ./src --llm claude")
-        print("  python TLDRFileCreator.py ./src --llm openai")
-        print("  python TLDRFileCreator.py ./src --llm grok")
+        print("  python tldr_file_creator.py ./src --llm claude")
+        print("  python tldr_file_creator.py ./src --llm openai")
+        print("  python tldr_file_creator.py ./src --llm grok")
     
     def validate(self) -> bool:
         """

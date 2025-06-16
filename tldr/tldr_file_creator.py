@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-TLDRFileCreator.py - Creates design.md-like files for directories
+tldr_file_creator.py - Creates design.md-like files for directories
 
 This script scans a directory and creates a markdown file with signatures
 extracted from each file using signature_extractor.py.
 
 Usage:
-    python TLDRFileCreator.py <directory_path> [output_filename]
+    python tldr_file_creator.py <directory_path> [output_filename]
 """
 import logging_setup
 import os
@@ -23,7 +23,7 @@ from pygments_tldr.util import ClassNotFound
 from llm_providers import LLMFactory, LLMConfig
 
 class TLDRFileCreator:
-    def __init__(self, llm_provider: str = None, skip_file_summary: bool = False):
+    def __init__(self, llm_provider: str = None, skip_file_summary: bool = True):
         if llm_provider is None and not skip_file_summary:
             raise ValueError("llm_provider must be specified when initializing TLDRFileCreator (unless skip_file_summary=True)")
             
@@ -213,20 +213,19 @@ class TLDRFileCreator:
                 signatures_list = [f"Error extracting signatures: {e}"]
                 raise
 
-            # Generate AI-powered summary if LLM provider is available and not skipped
-            if self.skip_file_summary:
-                logging.debug(f"Skipping file summary generation for {file_path}")
-                summary = "File summary generation skipped"
-            else:
-                logging.debug(f"Generating file summary from LLM for {file_path}")
-                summary = self._generate_file_summary(file_path, signatures_text)
-
             file_data = {
                 "file_path": abs_file_path,
                 "last_scanned": timestamp,
-                "signatures": signatures_list,
-                "summary": summary
+                "signatures": signatures_list
             }
+            
+            # Generate AI-powered summary if LLM provider is available and not skipped
+            if not self.skip_file_summary:
+                logging.debug(f"Generating file summary from LLM for {file_path}")
+                summary = self._generate_file_summary(file_path, signatures_text)
+                file_data["summary"] = summary
+            else:
+                logging.debug(f"Skipping file summary generation for {file_path}")
             
             json_data["files"].append(file_data)
 
@@ -437,8 +436,8 @@ def main():
                        help='Process directories recursively, creating one combined tldr.json file in the base directory')
     parser.add_argument('--llm', choices=LLMFactory.available_providers(), 
                        help='LLM provider to use for generating summaries')
-    parser.add_argument('--skip-file-summary', action='store_true',
-                       help='Skip generating file summaries using LLM')
+    parser.add_argument('--include-file-summary', action='store_true',
+                       help='Include AI-generated file summaries (requires --llm)')
     parser.add_argument('--setup-llm', action='store_true', 
                        help='Show LLM setup instructions')
     
@@ -449,8 +448,16 @@ def main():
         LLMConfig.print_env_setup_instructions()
         return
     
+    # Determine if file summaries should be included
+    include_summaries = args.include_file_summary
+    
+    # Validate LLM requirement for summaries
+    if include_summaries and not args.llm:
+        print("Error: --include-file-summary requires --llm to be specified")
+        sys.exit(1)
+    
     try:
-        creator = TLDRFileCreator(llm_provider=args.llm, skip_file_summary=args.skip_file_summary)
+        creator = TLDRFileCreator(llm_provider=args.llm, skip_file_summary=not include_summaries)
         creator.create_tldr_file(args.directory_path, args.output_filename, args.recursive)
     except Exception as e:
         print(f"Error: {e}")

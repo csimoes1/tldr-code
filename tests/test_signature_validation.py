@@ -11,7 +11,7 @@ import sys
 import logging
 import pytest
 
-from tldr.signature_extractor_llm import SignatureExtractorLLM
+from tests.signature_extractor_llm import SignatureExtractorLLM
 from tldr.llm_providers import LLMFactory, LLMConfig
 
 
@@ -346,8 +346,8 @@ Be thorough and precise in your analysis."""
             logging.warning(f"Missing signatures detected: {validation_result['missing_signatures']}")
     
     def test_signature_extraction_on_tldr_creator(self):
-        """Test signature extraction on TLDRFileCreator.py"""
-        test_file = os.path.join(os.path.dirname(__file__), '..', 'tldr', 'TLDRFileCreator.py')
+        """Test signature extraction on tldr_file_creator.py"""
+        test_file = os.path.join(os.path.dirname(__file__), '..', 'tldr', 'tldr_file_creator.py')
         
         # Extract signatures
         extracted_signatures = self.signature_extractor.get_signatures(test_file)
@@ -377,7 +377,7 @@ Be thorough and precise in your analysis."""
         # ]
         test_files = [
             os.path.join(os.path.dirname(__file__), '..', 'tldr', 'signature_extractor.py'),
-            os.path.join(os.path.dirname(__file__), '..', 'tldr', 'TLDRFileCreator.py'),
+            os.path.join(os.path.dirname(__file__), '..', 'tldr', 'tldr_file_creator.py'),
         ]
         
         # Add LLM provider files if they exist
