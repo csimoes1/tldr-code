@@ -13,13 +13,12 @@ Usage:
     signatures = extractor.get_signatures('path/to/file.py')
 """
 
-import logging_setup
 import logging
 import os
 from typing import Optional
 from pygments_tldr.lexers import get_lexer_for_filename
 from pygments_tldr.util import ClassNotFound
-from llm_providers import LLMFactory, LLMConfig
+from tldr.llm_providers import LLMFactory, LLMConfig
 
 
 class SignatureExtractorLLM:

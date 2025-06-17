@@ -16,13 +16,16 @@ import os
 import sys
 import argparse
 import logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(funcName)s(): - %(message)s",
+    handlers=[logging.StreamHandler()]
+)
+
 from urllib.parse import urlparse
 
-# Add the tldr directory to Python path to import modules
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'tldr'))
-
-from github_adapter import GitHubAdapter
-from tldr_file_creator import TLDRFileCreator
+from tldr.github_adapter import GitHubAdapter
+from tldr.tldr_file_creator import TLDRFileCreator
 
 def is_github_url(input_string: str) -> bool:
     """

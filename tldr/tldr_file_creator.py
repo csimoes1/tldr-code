@@ -8,7 +8,6 @@ extracted from each file using signature_extractor.py.
 Usage:
     python tldr_file_creator.py <directory_path> [output_filename]
 """
-import logging_setup
 import os
 import sys
 import logging
@@ -17,10 +16,10 @@ import tempfile
 import shutil
 from datetime import datetime
 from pathlib import Path
-from signature_extractor_pygments import SignatureExtractor
+from .signature_extractor_pygments import SignatureExtractor
 from pygments_tldr.lexers import get_lexer_for_filename
 from pygments_tldr.util import ClassNotFound
-from llm_providers import LLMFactory, LLMConfig
+from .llm_providers import LLMFactory, LLMConfig
 
 class TLDRFileCreator:
     def __init__(self, llm_provider: str = None, skip_file_summary: bool = True):

@@ -10,7 +10,7 @@ import logging
 import requests
 import json
 
-from tldr_code.llm_providers import LLMProvider, LLMResponse
+from .llm_provider import LLMProvider, LLMResponse
 
 
 class GrokProvider(LLMProvider):

@@ -22,7 +22,7 @@ import time
 from pathlib import Path
 from urllib.parse import urlparse
 
-from tldr_file_creator import TLDRFileCreator
+from .tldr_file_creator import TLDRFileCreator
 
 # Configure logging to write to both console and file
 def setup_logging():

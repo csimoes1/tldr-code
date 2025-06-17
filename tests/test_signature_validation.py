@@ -12,7 +12,7 @@ import logging
 import pytest
 
 from tests.signature_extractor_llm import SignatureExtractorLLM
-from tldr_code.llm_providers import LLMFactory, LLMConfig
+from tldr.llm_providers import LLMFactory, LLMConfig
 
 
 class TestSignatureValidation:
