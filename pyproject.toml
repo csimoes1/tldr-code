@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tldr-code"
-version = "0.1.0"
+version = "0.1.1"
 description = "A Python tool that extracts function signatures from large codebases and generates concise summaries for LLM context preparation"
 readme = "README.md"
 requires-python = ">=3.8"
