@@ -429,36 +429,46 @@ def main():
     """
     import argparse
     
-    parser = argparse.ArgumentParser(description='Create TLDR JSON files for directories')
-    parser.add_argument('directory_path', help='Path to the directory to scan')
+    class CustomHelpFormatter(argparse.HelpFormatter):
+        def format_help(self):
+            help_text = super().format_help()
+            
+            # Add LLM setup instructions
+            llm_setup = "\n\nLLM PROVIDER SETUP:\n"
+            llm_setup += "=" * 20 + "\n"
+            
+            providers = LLMConfig.get_supported_providers()
+            for provider, env_var in providers.items():
+                llm_setup += f"\nFor {provider.upper()}:\n"
+                llm_setup += f"  export {env_var}='your-api-key-here'\n"
+            
+            llm_setup += "\nExample usage:\n"
+            llm_setup += "  python tldr_file_creator.py ./src\n"
+            llm_setup += "  python tldr_file_creator.py ./src my_output.json\n"
+            llm_setup += "\nNote: Directories are processed recursively by default.\n"
+            
+            return help_text + llm_setup
+    
+    parser = argparse.ArgumentParser(
+        description='Creates TLDR JSON file for all file and directories under the directory_path'
+        # ,
+        # formatter_class=CustomHelpFormatter
+    )
+    parser.add_argument('directory_path', help='Path to the directory to scan (processed recursively)')
     parser.add_argument('output_filename', nargs='?', help='Optional output filename (defaults to tldr.json)')
-    parser.add_argument('-r', '--recursive', action='store_true',
-                       help='Process directories recursively, creating one combined tldr.json file in the base directory')
-    parser.add_argument('--llm', choices=LLMFactory.available_providers(), 
-                       help='LLM provider to use for generating summaries')
-    parser.add_argument('--include-file-summary', action='store_true',
-                       help='Include AI-generated file summaries (requires --llm)')
-    parser.add_argument('--setup-llm', action='store_true', 
-                       help='Show LLM setup instructions')
+    # parser.add_argument('--llm', choices=LLMFactory.available_providers(),
+    #                    help='LLM provider to use for generating summaries')
+    # parser.add_argument('--include-file-summary', action='store_true',
+    #                    help='Include AI-generated file summaries (requires --llm)')
     
     args = parser.parse_args()
     
-    # Show LLM setup instructions if requested
-    if args.setup_llm:
-        LLMConfig.print_env_setup_instructions()
-        return
-    
-    # Determine if file summaries should be included
-    include_summaries = args.include_file_summary
-    
-    # Validate LLM requirement for summaries
-    if include_summaries and not args.llm:
-        print("Error: --include-file-summary requires --llm to be specified")
-        sys.exit(1)
+    # Note: File summaries and LLM functionality appear to be commented out
+    # Default behavior is now recursive processing
     
     try:
-        creator = TLDRFileCreator(llm_provider=args.llm, skip_file_summary=not include_summaries)
-        creator.create_tldr_file(args.directory_path, args.output_filename, args.recursive)
+        creator = TLDRFileCreator()
+        creator.create_tldr_file(args.directory_path, args.output_filename, recursive=True)
     except Exception as e:
         print(f"Error: {e}")
         sys.exit(1)

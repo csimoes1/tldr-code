@@ -60,13 +60,13 @@ def setup_logging():
 setup_logging()
 
 class GitHubAdapter:
-    def __init__(self, llm_provider: str = None, skip_file_summary: bool = False):
+    def __init__(self, llm_provider: str = None, skip_file_summary: bool = True):
         """
         Initialize the GitHub adapter.
         
         Args:
-            llm_provider (str): Optional LLM provider for generating summaries
-            skip_file_summary (bool): Skip generating file summaries using LLM
+            llm_provider (str): Optional LLM provider for generating summaries (default: None)
+            skip_file_summary (bool): Skip generating file summaries using LLM (default: True)
         """
         self.llm_provider = llm_provider
         self.skip_file_summary = skip_file_summary
@@ -79,7 +79,7 @@ class GitHubAdapter:
             github_url (str): GitHub repository URL (e.g., https://github.com/user/repo)
             output_dir (str): Directory to download the repo to. If None, uses temp directory
             cleanup (bool): Whether to clean up the downloaded repo after processing
-            recursive (bool): Whether to process subdirectories recursively
+            recursive (bool): Whether to process subdirectories recursively (default: True)
             
         Returns:
             str: Path to the generated TLDR file
@@ -246,27 +246,22 @@ def main():
     Main function for command line usage.
     """
     import argparse
-    from llm_providers import LLMFactory
+    # from llm_providers import LLMFactory  # No longer needed since we don't use LLM features
     
-    parser = argparse.ArgumentParser(description='Download GitHub repository and create TLDR file')
+    parser = argparse.ArgumentParser(description='Download GitHub repository and create TLDR file with function signatures (processes recursively, no file summaries)')
     parser.add_argument('github_url', help='GitHub repository URL')
     parser.add_argument('-o', '--output-dir', help='Output directory for downloaded repo and TLDR file')
     parser.add_argument('--no-cleanup', action='store_true', help='Keep downloaded repository after processing')
-    parser.add_argument('--no-recursive', action='store_true', help='Do not process subdirectories recursively')
-    parser.add_argument('--llm', choices=LLMFactory.available_providers(), 
-                       help='LLM provider to use for generating summaries')
-    parser.add_argument('--skip-file-summary', action='store_true',
-                       help='Skip generating file summaries using LLM')
     
     args = parser.parse_args()
     
     try:
-        adapter = GitHubAdapter(llm_provider=args.llm, skip_file_summary=args.skip_file_summary)
+        adapter = GitHubAdapter(llm_provider=None, skip_file_summary=True)
         tldr_file = adapter.process_github_repo(
             github_url=args.github_url,
             output_dir=args.output_dir,
             cleanup=not args.no_cleanup,
-            recursive=not args.no_recursive
+            recursive=True
         )
         print(f"TLDR file created: {tldr_file}")
         
