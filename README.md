@@ -6,10 +6,11 @@ TLDR is a Python tool that extracts function signatures from large codebases and
 
 - **Multi-language Support**: Supports 40+ programming languages via Pygments lexer integration
 - **Signature Extraction**: Extracts function, class, and method signatures from code files
+- **Runs Local, Runs Fast**: Optimized for speed and efficiency, processing large codebases quickly
 - **JSON Output**: Produces structured JSON output for easy integration with other tools
 - **Recursive Processing**: Can process entire directory trees recursively
 - **Atomic File Writing**: Ensures data integrity with atomic file operations
-- **(Optional) AI-Powered File Summaries**: Generates file summaries using LLM providers (Claude, OpenAI, Grok)
+- **(Future feature) AI-Powered File Summaries**: Can call out to LLM providers to generate file summaries using  (Claude, OpenAI, Grok)
 
 ## Supported Languages
 
