@@ -19,44 +19,24 @@ JavaScript/TypeScript, Python, Java, C/C++, C#, PHP, Ruby, Go, Rust, Swift, Scal
 
 ```bash
 # Clone the repository
-git clone <repository-url>
-cd tldr
+git clone https://github.com/csimoes1/tldr-code
+cd tldr-code
 
 # Install dependencies
 pip install -r requirements.txt
 ```
 
-## Configuration
-
-TLDR supports multiple LLM providers. Set up your API keys:
-
-```bash
-# For Claude (Anthropic)
-export ANTHROPIC_API_KEY='your-api-key-here'
-
-# For OpenAI
-export OPENAI_API_KEY='your-api-key-here'
-
-# For Grok
-export GROK_API_KEY='your-api-key-here'
-```
-
 ## Usage
 
-### Basic Usage
-
 ```bash
-# Process a single directory
-python tldr/tldr_file_creator.py ./src
+# Process a local directory tree to generate a tldr summary file
+python tldr_code.py .
 
-# Specify output filename
-python tldr/tldr_file_creator.py ./src my_summary.json
+# Process a GitHub repository and create a tldr summary file
+python tldr_code.py https://github.com/PowerShell/PowerShell 
 
-# Process recursively with AI summaries
-python tldr/tldr_file_creator.py ./src --recursive --llm claude
-
-# Skip AI summaries (signatures only)
-python tldr/tldr_file_creator.py ./src --skip-file-summary
+# Process a GitHub repository and store the downloaded files and the tldr summary file in a specific directory
+python tldr_code.py https://github.com/PowerShell/PowerShell /Users/csimoes/repos/PowerShell
 ```
 
 ### Command Line Options

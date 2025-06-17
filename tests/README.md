@@ -27,6 +27,7 @@ Below is a list of projects we are considering for testing.  We are looking for 
 
 
 ### C#:
+- PowerShell - (154M)
 
 
 ## Testing with LLMs
