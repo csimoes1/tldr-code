@@ -196,7 +196,6 @@ class TLDRFileCreator:
         # Start building the JSON structure
         json_data = {
             "directory_path": directory_path,
-            "last_updated": timestamp,
             "files": []
         }
         
