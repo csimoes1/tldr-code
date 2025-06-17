@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 """
-tldr.py - Main entry point for TLDR function signature extractor
+tldr_code.py - Main entry point for TLDR function signature extractor
 
 This script automatically detects whether the input is a GitHub URL or local directory path
 and processes it accordingly to generate TLDR JSON files with function signatures.
 
 Usage:
-    python tldr.py <github_url_or_directory_path> [output_filename]
-    python tldr.py https://github.com/user/repo
-    python tldr.py ./src/my_project
-    python tldr.py ./src/my_project my_output.json
+    python tldr_code.py <github_url_or_directory_path> [output_filename]
+    python tldr_code.py https://github.com/user/repo
+    python tldr_code.py ./src/my_project
+    python tldr_code.py ./src/my_project my_output.json
 """
 
 import os
@@ -122,10 +122,10 @@ def main():
         description='TLDR - Extract function signatures from GitHub repositories or local directories',
         epilog="""
 Examples:
-  python tldr.py https://github.com/user/repo
-  python tldr.py ./src/my_project
-  python tldr.py ./src/my_project custom_output.json
-  python tldr.py https://github.com/user/repo repo_summary.json
+  python tldr_code.py https://github.com/user/repo
+  python tldr_code.py ./src/my_project
+  python tldr_code.py ./src/my_project custom_output.json
+  python tldr_code.py https://github.com/user/repo repo_summary.json
         """,
         formatter_class=argparse.RawDescriptionHelpFormatter
     )
