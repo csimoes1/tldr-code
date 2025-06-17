@@ -125,14 +125,14 @@ Examples:
   python tldr_code.py https://github.com/user/repo
   python tldr_code.py ./src/my_project
   python tldr_code.py ./src/my_project custom_output.json
-  python tldr_code.py https://github.com/user/repo repo_summary.json
+  python tldr_code.py https://github.com/user/repo /path/for/downloaded/repo
         """,
         formatter_class=argparse.RawDescriptionHelpFormatter
     )
     
     parser.add_argument(
-        'input', 
-        help='GitHub repository URL or local directory path to process'
+        'input',
+        help='GitHub repository URL (https://github.com/fastapi/fastapi) or local directory path to process (/path/to/directory))'
     )
     parser.add_argument(
         'output_filename', 

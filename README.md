@@ -19,9 +19,11 @@ JavaScript/TypeScript, Python, Java, C/C++, C#, PHP, Ruby, Go, Rust, Swift, Scal
 
 ```bash
 # Clone the repository
-git clone https://github.com/csimoes1/tldr-code
+git clone https://github.com/csimoes1/tldr-code.git
 cd tldr-code
-
+# Create a virtual environment (optional but recommended)
+python -m venv venv
+source venv/bin/activate  # On Windows use `venv\Scripts\activate`
 # Install dependencies
 pip install -r requirements.txt
 ```
@@ -29,24 +31,23 @@ pip install -r requirements.txt
 ## Usage
 
 ```bash
+# Show usage help message
+python tldr_code.py -h 
+
 # Process a local directory tree to generate a tldr summary file
-python tldr_code.py .
+python tldr_code.py /path/to/directory
 
-# Process a GitHub repository and create a tldr summary file
-python tldr_code.py https://github.com/PowerShell/PowerShell 
+# Example: Process a GitHub repository and create a tldr summary file (example here is the Python fastapi project)
+python tldr_code.py https://github.com/fastapi/fastapi 
 
-# Process a GitHub repository and store the downloaded files and the tldr summary file in a specific directory
-python tldr_code.py https://github.com/PowerShell/PowerShell /Users/csimoes/repos/PowerShell
+# Example: Process a GitHub repository and store the downloaded files and the tldr summary file in a specific directory
+python tldr_code.py https://github.com/fastapi/fastapi /Users/csimoes/repos/fastapi
 ```
 
 ### Command Line Options
 
-- `directory_path`: Path to the directory to scan (required)
+- `input (GitHub URL | /path/to/directory)`: Path to the repo/directory to scan (required)
 - `output_filename`: Output filename (optional, defaults to `tldr.json`)
-- `-r, --recursive`: Process directories recursively
-- `--llm {claude,openai,grok}`: LLM provider for generating summaries
-- `--skip-file-summary`: Skip AI-generated summaries
-- `--setup-llm`: Show LLM setup instructions
 
 ## Output Format
 
@@ -71,30 +72,12 @@ TLDR generates JSON files with the following structure:
 }
 ```
 
-For recursive processing, the output includes multiple directories:
-
-```json
-{
-  "root_directory": "/path/to/project",
-  "last_updated": "2025-06-16T10:30:00Z",
-  "total_directories_processed": 5,
-  "directories": [...]
-}
-```
-
 ## Use Cases
 
 1. **LLM Context Preparation**: Quickly generate summaries of large codebases for LLM analysis
 2. **Code Documentation**: Automatically extract API signatures for documentation
 3. **Codebase Analysis**: Get an overview of code structure and functionality
 4. **Code Review Assistance**: Understand code changes and their impact
-
-## Architecture
-
-- **TLDRFileCreator**: Main orchestrator class
-- **SignatureExtractor**: Extracts signatures using Pygments lexers
-- **LLM Providers**: Pluggable AI providers for generating summaries
-- **Atomic File Operations**: Ensures data integrity during file writes
 
 ## Contributing
 
