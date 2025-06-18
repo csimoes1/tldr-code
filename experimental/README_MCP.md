@@ -1,3 +1,5 @@
+# UNDER CONSTRUCTION - not ready yet
+
 # TLDR Code MCP Server
 
 This MCP (Model Context Protocol) server exposes the tldr-code functionality as tools that can be used by Claude and other LLMs to analyze codebases and generate function signature summaries.
