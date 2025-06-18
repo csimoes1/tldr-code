@@ -52,20 +52,21 @@ def is_github_url(input_string: str) -> bool:
     except Exception:
         return False
 
-def process_github_url(github_url: str, output_filename: str = None) -> str:
+def process_github_url(github_url: str, output_filename: str = None, terse_output: bool = False) -> str:
     """
     Process a GitHub URL to create a TLDR file.
     
     Args:
         github_url (str): GitHub repository URL
         output_filename (str): Optional output filename
+        terse_output (bool): Exclude files with 0 signatures
         
     Returns:
         str: Path to the generated TLDR file
     """
     print(f"Processing GitHub repository: {github_url}")
     
-    adapter = GitHubAdapter()
+    adapter = GitHubAdapter(terse_output=terse_output)
     
     # Determine output directory - use current directory if no specific output file given
     if output_filename:
@@ -89,13 +90,14 @@ def process_github_url(github_url: str, output_filename: str = None) -> str:
     
     return tldr_file
 
-def process_local_path(directory_path: str, output_filename: str = None) -> str:
+def process_local_path(directory_path: str, output_filename: str = None, terse_output: bool = False) -> str:
     """
     Process a local directory path to create a TLDR file.
     
     Args:
         directory_path (str): Local directory path
         output_filename (str): Optional output filename
+        terse_output (bool): Exclude files with 0 signatures
         
     Returns:
         str: Path to the generated TLDR file
@@ -108,7 +110,7 @@ def process_local_path(directory_path: str, output_filename: str = None) -> str:
     if not os.path.isdir(directory_path):
         raise ValueError(f"'{directory_path}' is not a directory.")
     
-    creator = TLDRFileCreator()
+    creator = TLDRFileCreator(terse_output=terse_output)
     
     # Set default output filename if not provided
     if output_filename is None:
@@ -147,6 +149,11 @@ Examples:
         action='store_true',
         help='Enable verbose logging'
     )
+    parser.add_argument(
+        '--terse-output',
+        action='store_true',
+        help='Exclude files with 0 signatures from output'
+    )
     
     args = parser.parse_args()
     
@@ -160,10 +167,10 @@ Examples:
     try:
         # Detect input type and route accordingly
         if is_github_url(args.input):
-            tldr_file = process_github_url(args.input, args.output_filename)
+            tldr_file = process_github_url(args.input, args.output_filename, args.terse_output)
             print(f"✓ GitHub repository processed successfully!")
         else:
-            tldr_file = process_local_path(args.input, args.output_filename)
+            tldr_file = process_local_path(args.input, args.output_filename, args.terse_output)
             print(f"✓ Local directory processed successfully!")
         
         print(f"TLDR file created: {tldr_file}")

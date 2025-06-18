@@ -22,13 +22,14 @@ from pygments_tldr.util import ClassNotFound
 from .llm_providers import LLMFactory, LLMConfig
 
 class TLDRFileCreator:
-    def __init__(self, llm_provider: str = None, skip_file_summary: bool = True):
+    def __init__(self, llm_provider: str = None, skip_file_summary: bool = True, terse_output: bool = False):
         if llm_provider is None and not skip_file_summary:
             raise ValueError("llm_provider must be specified when initializing TLDRFileCreator (unless skip_file_summary=True)")
             
         self.signature_extractor = SignatureExtractor()
         self.llm_provider = None
         self.skip_file_summary = skip_file_summary
+        self.terse_output = terse_output
         
         # Lexers to exclude (non-programming languages)
         self.excluded_lexers = {
@@ -101,7 +102,7 @@ class TLDRFileCreator:
         # Sort files for consistent output
         files.sort()
         
-        # Generate the JSON content
+        # Generate the JSON content (single directory mode uses absolute paths as before)
         content = self._generate_json_content(abs_directory_path, files)
         
         # Write atomically using temporary file
@@ -120,6 +121,7 @@ class TLDRFileCreator:
         """
         processed_count = 0
         all_directories = []
+        abs_root_directory = os.path.abspath(root_directory)
         
         # Walk through all directories
         for root, dirs, filenames in os.walk(root_directory):
@@ -141,9 +143,9 @@ class TLDRFileCreator:
                 # Sort files for consistent output
                 programming_files.sort()
                 
-                # Generate the JSON content for this directory
+                # Generate the JSON content for this directory using relative paths
                 abs_directory_path = os.path.abspath(root)
-                directory_content = self._generate_json_content(abs_directory_path, programming_files)
+                directory_content = self._generate_json_content(abs_directory_path, programming_files, abs_root_directory)
                 all_directories.append(directory_content)
                 
                 print(f"Processed directory: {abs_directory_path}")
@@ -165,7 +167,7 @@ class TLDRFileCreator:
             
             timestamp = datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')
             combined_content = {
-                "root_directory": os.path.abspath(root_directory),
+                "root_directory": abs_root_directory,
                 "last_updated": timestamp,
                 "total_directories_processed": processed_count,
                 "directories": all_directories
@@ -178,13 +180,14 @@ class TLDRFileCreator:
         
         print(f"Recursive processing complete. Processed {processed_count} directories into one file.")
         
-    def _generate_json_content(self, directory_path, files):
+    def _generate_json_content(self, directory_path, files, root_directory=None):
         """
         Generates the JSON content for the TLDR file.
         
         Args:
             directory_path (str): Absolute path to the directory
             files (list): List of file paths to process
+            root_directory (str): Root directory for calculating relative paths (optional)
             
         Returns:
             dict: Generated JSON content
@@ -192,15 +195,29 @@ class TLDRFileCreator:
         # Current timestamp
         timestamp = datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')
         
+        # Calculate relative directory path if root_directory is provided
+        if root_directory:
+            rel_directory_path = os.path.relpath(directory_path, root_directory)
+            # Use '.' for the root directory itself
+            if rel_directory_path == '.':
+                rel_directory_path = '.'
+        else:
+            rel_directory_path = directory_path
+        
         # Start building the JSON structure
         json_data = {
-            "directory_path": directory_path,
+            "directory_path": rel_directory_path,
             "files": []
         }
         
         # Process each file
         for file_path in files:
+            # Calculate relative file path if root_directory is provided
             abs_file_path = os.path.abspath(file_path)
+            if root_directory:
+                rel_file_path = os.path.relpath(abs_file_path, root_directory)
+            else:
+                rel_file_path = abs_file_path
             
             # Extract signatures using signature_extractor
             try:
@@ -211,8 +228,13 @@ class TLDRFileCreator:
                 signatures_list = [f"Error extracting signatures: {e}"]
                 raise
 
+            # Skip files with 0 signatures if terse_output is enabled
+            if self.terse_output and len(signatures_list) == 0:
+                logging.debug(f"Skipping file {file_path} (0 signatures, terse_output enabled)")
+                continue
+
             file_data = {
-                "file_path": abs_file_path,
+                "file_name": os.path.basename(file_path),
                 "last_scanned": timestamp,
                 "signatures": signatures_list
             }

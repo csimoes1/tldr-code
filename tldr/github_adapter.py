@@ -60,16 +60,18 @@ def setup_logging():
 setup_logging()
 
 class GitHubAdapter:
-    def __init__(self, llm_provider: str = None, skip_file_summary: bool = True):
+    def __init__(self, llm_provider: str = None, skip_file_summary: bool = True, terse_output: bool = False):
         """
         Initialize the GitHub adapter.
         
         Args:
             llm_provider (str): Optional LLM provider for generating summaries (default: None)
             skip_file_summary (bool): Skip generating file summaries using LLM (default: True)
+            terse_output (bool): Exclude files with 0 signatures from output (default: False)
         """
         self.llm_provider = llm_provider
         self.skip_file_summary = skip_file_summary
+        self.terse_output = terse_output
         
     def process_github_repo(self, github_url: str, output_dir: str = None, cleanup: bool = True, recursive: bool = True):
         """
@@ -119,7 +121,7 @@ class GitHubAdapter:
             tldr_filename = os.path.join(download_path, f"{repo_name}.tldr.json")
             logging.info(f"Creating TLDR file: {tldr_filename}")
             
-            creator = TLDRFileCreator(llm_provider=self.llm_provider, skip_file_summary=self.skip_file_summary)
+            creator = TLDRFileCreator(llm_provider=self.llm_provider, skip_file_summary=self.skip_file_summary, terse_output=self.terse_output)
             creator.create_tldr_file(download_path, tldr_filename, recursive=recursive)
             tldr_end = time.time()
             logging.info(f"TLDR file creation completed in {tldr_end - tldr_start:.2f} seconds")
