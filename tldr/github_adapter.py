@@ -73,7 +73,7 @@ class GitHubAdapter:
         self.skip_file_summary = skip_file_summary
         self.terse_output = terse_output
         
-    def process_github_repo(self, github_url: str, output_dir: str = None, cleanup: bool = True, recursive: bool = True):
+    def  process_github_repo(self, github_url: str, output_dir: str = None, cleanup: bool = True, recursive: bool = True):
         """
         Download a GitHub repository and create a TLDR file.
         

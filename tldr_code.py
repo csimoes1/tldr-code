@@ -16,11 +16,6 @@ import os
 import sys
 import argparse
 import logging
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(funcName)s(): - %(message)s",
-    handlers=[logging.StreamHandler()]
-)
 
 from urllib.parse import urlparse
 
@@ -64,7 +59,7 @@ def process_github_url(github_url: str, output_filename: str = None, terse_outpu
     Returns:
         str: Path to the generated TLDR file
     """
-    print(f"Processing GitHub repository: {github_url}")
+    logging.info(f"Processing GitHub repository: {github_url}")
     
     adapter = GitHubAdapter(terse_output=terse_output)
     
@@ -102,7 +97,7 @@ def process_local_path(directory_path: str, output_filename: str = None, terse_o
     Returns:
         str: Path to the generated TLDR file
     """
-    print(f"Processing local directory: {directory_path}")
+    logging.info(f"Processing local directory: {directory_path}")
     
     if not os.path.exists(directory_path):
         raise FileNotFoundError(f"Directory '{directory_path}' not found.")
@@ -159,27 +154,32 @@ Examples:
     
     # Configure logging
     log_level = logging.DEBUG if args.verbose else logging.INFO
-    logging.basicConfig(
-        level=log_level,
-        format="%(asctime)s - %(levelname)s - %(message)s"
-    )
-    
+    logging.info(f"Setting log level to: {logging.getLevelName(log_level)}")
+    # logging.basicConfig(
+    #     level=log_level,
+    #     format="%(asctime)s - %(levelname)s - %(message)s"
+    # )
+    logging.getLogger().setLevel(log_level)
+    logging.debug(f"SHOW DEBUG")
+    logging.info(f"SHOW INFO")
+
     try:
+        logging.debug(f"args: {args}")
         # Detect input type and route accordingly
         if is_github_url(args.input):
             tldr_file = process_github_url(args.input, args.output_filename, args.terse_output)
-            print(f"✓ GitHub repository processed successfully!")
+            logging.info(f"✓ GitHub repository processed successfully!")
         else:
             tldr_file = process_local_path(args.input, args.output_filename, args.terse_output)
-            print(f"✓ Local directory processed successfully!")
+            logging.info(f"✓ Local directory processed successfully!")
         
-        print(f"TLDR file created: {tldr_file}")
+        logging.info(f"TLDR file created: {tldr_file}")
         
     except KeyboardInterrupt:
-        print("\n✗ Operation cancelled by user")
+        logging.info("\n✗ Operation cancelled by user")
         sys.exit(1)
     except Exception as e:
-        print(f"✗ Error: {e}")
+        logging.info(f"✗ Error: {e}")
         if args.verbose:
             import traceback
             traceback.print_exc()
