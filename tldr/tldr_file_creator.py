@@ -128,6 +128,11 @@ class TLDRFileCreator:
                 #     output_filename = base_output_filename
             
             timestamp = datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')
+
+            # For GitHub repos we don't have a root directory
+            if not self.local:
+                abs_root_directory = "GitHub Repository"
+
             combined_content = {
                 "root_directory": abs_root_directory,
                 "last_updated": timestamp,
