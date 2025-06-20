@@ -16,6 +16,7 @@ import os
 import sys
 import argparse
 import logging
+from pathlib import Path
 
 from urllib.parse import urlparse
 
@@ -47,7 +48,7 @@ def is_github_url(input_string: str) -> bool:
     except Exception:
         return False
 
-def process_github_url(github_url: str, output_filename: str = None, terse_output: bool = False) -> str:
+def process_github_url(github_url: str, github_temp_dir: str, output_filename: str = None, terse_output: bool = False) -> str:
     """
     Process a GitHub URL to create a TLDR file.
     
@@ -58,18 +59,19 @@ def process_github_url(github_url: str, output_filename: str = None, terse_outpu
         
     Returns:
         str: Path to the generated TLDR file
+        :param github_temp_dir:
     """
     logging.info(f"Processing GitHub repository: {github_url}")
     
     adapter = GitHubAdapter(terse_output=terse_output)
     
     # Determine output directory - use current directory if no specific output file given
-    if output_filename:
-        output_dir = os.path.dirname(os.path.abspath(output_filename))
+    if github_temp_dir:
+        output_dir = os.path.abspath(github_temp_dir)
         if not output_dir:
-            output_dir = "."
+            raise NotADirectoryError(f"Temporary directory '{github_temp_dir}' is not a valid directory.")
     else:
-        output_dir = "."
+        output_dir = os.path.abspath(".") # use current directory by default
     
     tldr_file = adapter.process_github_repo(
         github_url=github_url,
@@ -149,25 +151,24 @@ Examples:
         action='store_true',
         help='Exclude files with 0 signatures from output'
     )
-    
+    parser.add_argument(
+        '--github-temp-dir',
+        type=Path,
+        help='location to store temporary files for GitHub repos (default: current directory), ignored if input is a local directory'
+    )
+
     args = parser.parse_args()
     
     # Configure logging
     log_level = logging.DEBUG if args.verbose else logging.INFO
-    logging.info(f"Setting log level to: {logging.getLevelName(log_level)}")
-    # logging.basicConfig(
-    #     level=log_level,
-    #     format="%(asctime)s - %(levelname)s - %(message)s"
-    # )
+    # logging.info(f"Setting log level to: {logging.getLevelName(log_level)}")
     logging.getLogger().setLevel(log_level)
-    logging.debug(f"SHOW DEBUG")
-    logging.info(f"SHOW INFO")
 
     try:
         logging.debug(f"args: {args}")
         # Detect input type and route accordingly
         if is_github_url(args.input):
-            tldr_file = process_github_url(args.input, args.output_filename, args.terse_output)
+            tldr_file = process_github_url(args.input, args.github_temp_dir, args.output_filename, args.terse_output)
             logging.info(f"✓ GitHub repository processed successfully!")
         else:
             tldr_file = process_local_path(args.input, args.output_filename, args.terse_output)

@@ -101,7 +101,7 @@ async def generate_tldr(arguments: dict[str, Any]) -> list[TextContent]:
         
         # Determine if this is a GitHub URL or local path
         if is_github_url(path):
-            tldr_file = process_github_url(path, output_filename)
+            tldr_file = process_github_url(path, ".", output_filename)
         else:
             # Expand user home directory if needed
             expanded_path = os.path.expanduser(path)
