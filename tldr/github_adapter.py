@@ -73,7 +73,7 @@ class GitHubAdapter:
         self.skip_file_summary = skip_file_summary
         self.terse_output = terse_output
         
-    def  process_github_repo(self, github_url: str, output_dir: str = None, cleanup: bool = True, recursive: bool = True):
+    def  process_github_repo(self, github_url: str, output_dir: str = None, cleanup: bool = True):
         """
         Download a GitHub repository and create a TLDR file.
         
@@ -122,7 +122,7 @@ class GitHubAdapter:
             logging.info(f"Creating TLDR file: {tldr_filename}")
             
             creator = TLDRFileCreator(llm_provider=self.llm_provider, skip_file_summary=self.skip_file_summary, terse_output=self.terse_output)
-            creator.create_tldr_file(download_path, tldr_filename, recursive=recursive)
+            creator.create_tldr_file(download_path, tldr_filename)
             tldr_end = time.time()
             logging.info(f"TLDR file creation completed in {tldr_end - tldr_start:.2f} seconds")
             

@@ -22,7 +22,7 @@ from pygments_tldr.util import ClassNotFound
 from .llm_providers import LLMFactory, LLMConfig
 
 class TLDRFileCreator:
-    def __init__(self, llm_provider: str = None, skip_file_summary: bool = True, terse_output: bool = False):
+    def __init__(self, llm_provider: str = None, skip_file_summary: bool = True, terse_output: bool = False, local: bool = True):
         if llm_provider is None and not skip_file_summary:
             raise ValueError("llm_provider must be specified when initializing TLDRFileCreator (unless skip_file_summary=True)")
             
@@ -30,6 +30,7 @@ class TLDRFileCreator:
         self.llm_provider = None
         self.skip_file_summary = skip_file_summary
         self.terse_output = terse_output
+        self.local = local  # Whether we are processing local files or GitHub URLs
         
         # Lexers to exclude (non-programming languages)
         self.excluded_lexers = {
@@ -49,7 +50,7 @@ class TLDRFileCreator:
         if not skip_file_summary:
             self._setup_llm_provider(llm_provider)
         
-    def create_tldr_file(self, directory_path, output_filename=None, recursive=False):
+    def create_tldr_file(self, directory_path, output_filename=None):
         """
         Creates a TLDR markdown file for the given directory.
         
@@ -68,48 +69,9 @@ class TLDRFileCreator:
         if output_filename is None:
             output_filename = os.path.join(directory_path, 'tldr.json')
         
-        # Get absolute path for the directory
-        abs_directory_path = os.path.abspath(directory_path)
-        
-        if recursive:
-            # Process each directory separately in recursive mode
-            self._process_directories_recursively(directory_path, output_filename)
-        else:
-            # Process only the current directory
-            self._process_single_directory(directory_path, output_filename)
-    
-    def _process_single_directory(self, directory_path, output_filename):
-        """
-        Process a single directory and create a TLDR file for it.
-        
-        Args:
-            directory_path (str): Path to the directory to scan
-            output_filename (str): Output filename for the TLDR file
-        """
-        # Get absolute path for the directory
-        abs_directory_path = os.path.abspath(directory_path)
-        
-        # Collect files only in the current directory
-        files = []
-        for item in os.listdir(directory_path):
-            # Skip hidden files and temporary files
-            if item.startswith('.') or item.endswith('.tmp'):
-                continue
-            item_path = os.path.join(directory_path, item)
-            if os.path.isfile(item_path) and self._is_programming_file(item_path):
-                files.append(item_path)
-        
-        # Sort files for consistent output
-        files.sort()
-        
-        # Generate the JSON content (single directory mode uses absolute paths as before)
-        content = self._generate_json_content(abs_directory_path, files)
-        
-        # Write atomically using temporary file
-        self._write_json_atomically(content, output_filename)
-            
-        print(f"TLDR file created: {output_filename}")
-    
+        # Process each directory in recursive mode
+        self._process_directories_recursively(directory_path, output_filename)
+
     def _process_directories_recursively(self, root_directory, base_output_filename):
         """
         Process directories recursively, creating one large TLDR file in the base directory
@@ -488,7 +450,7 @@ def main():
     
     try:
         creator = TLDRFileCreator()
-        creator.create_tldr_file(args.directory_path, args.output_filename, recursive=True)
+        creator.create_tldr_file(args.directory_path, args.output_filename)
     except Exception as e:
         print(f"Error: {e}")
         sys.exit(1)

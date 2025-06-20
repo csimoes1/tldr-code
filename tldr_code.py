@@ -76,8 +76,7 @@ def process_github_url(github_url: str, github_temp_dir: str, output_filename: s
     tldr_file = adapter.process_github_repo(
         github_url=github_url,
         output_dir=output_dir,
-        cleanup=True,
-        recursive=True
+        cleanup=True
     )
     
     # If user specified a custom output filename, rename the file
@@ -113,7 +112,7 @@ def process_local_path(directory_path: str, output_filename: str = None, terse_o
     if output_filename is None:
         output_filename = os.path.join(directory_path, 'tldr.json')
     
-    creator.create_tldr_file(directory_path, output_filename, recursive=True)
+    creator.create_tldr_file(directory_path, output_filename)
     return output_filename
 
 def main():
