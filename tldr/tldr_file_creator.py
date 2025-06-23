@@ -22,7 +22,8 @@ from pygments_tldr.util import ClassNotFound
 from .llm_providers import LLMFactory, LLMConfig
 
 class TLDRFileCreator:
-    def __init__(self, llm_provider: str = None, skip_file_summary: bool = True, terse_output: bool = False, local: bool = True):
+    def __init__(self, llm_provider: str = None, skip_file_summary: bool = True,
+                 terse_output: bool = False, local: bool = True, github_url: str = None):
         if llm_provider is None and not skip_file_summary:
             raise ValueError("llm_provider must be specified when initializing TLDRFileCreator (unless skip_file_summary=True)")
             
@@ -31,7 +32,48 @@ class TLDRFileCreator:
         self.skip_file_summary = skip_file_summary
         self.terse_output = terse_output
         self.local = local  # Whether we are processing local files or GitHub URLs
-        
+        self.github_url = github_url  # Optional GitHub URL for adding to tldr file as "root_directory"
+
+        # Please see _is_programming_file for details on how we determine programming files
+        # excluded_lexers is a secondary check after file extension check
+        # Common programming file extensions
+        self.programming_extensions = {
+            '.py', '.pyx', '.pyi',  # Python
+            '.js', '.jsx', '.ts', '.tsx', '.mjs', '.cjs',  # JavaScript/TypeScript
+            '.java', '.kt', '.kts',  # Java/Kotlin
+            '.c', '.h', '.cpp', '.hpp', '.cc', '.cxx', '.c++',  # C/C++
+            '.cs', '.vb',  # C#/VB.NET
+            '.php', '.php3', '.php4', '.php5', '.phtml',  # PHP
+            '.rb', '.rbw',  # Ruby
+            '.go',  # Go
+            '.rs',  # Rust
+            '.swift',  # Swift
+            '.m', '.mm',  # Objective-C
+            '.scala', '.sc',  # Scala
+            '.pl', '.pm', '.pod',  # Perl
+            '.sh', '.bash', '.zsh', '.fish',  # Shell scripts
+            '.ps1', '.psm1', '.psd1',  # PowerShell
+            '.r', '.R',  # R
+            '.matlab', '.m',  # MATLAB
+            '.lua',  # Lua
+            '.dart',  # Dart
+            '.ex', '.exs',  # Elixir
+            '.erl', '.hrl',  # Erlang
+            '.hs', '.lhs',  # Haskell
+            '.clj', '.cljs', '.cljc',  # Clojure
+            '.fs', '.fsx', '.fsi',  # F#
+            '.ml', '.mli',  # OCaml
+            '.pas', '.pp', '.inc',  # Pascal
+            '.ada', '.adb', '.ads',  # Ada
+            '.d',  # D
+            '.nim',  # Nim
+            '.crystal', '.cr',  # Crystal
+            '.zig',  # Zig
+            '.v',  # V
+            '.jl',  # Julia
+            '.groovy', '.gvy', '.gy', '.gsh',  # Groovy
+        }
+
         # Lexers to exclude (non-programming languages)
         self.excluded_lexers = {
             'TextLexer',           # Plain text
@@ -52,12 +94,11 @@ class TLDRFileCreator:
         
     def create_tldr_file(self, directory_path, output_filename=None):
         """
-        Creates a TLDR markdown file for the given directory.
+        Creates a TLDR file for the given directory.
         
         Args:
             directory_path (str): Path to the directory to scan
             output_filename (str): Optional output filename, defaults to 'tldr.json'
-            recursive (bool): If True, process subdirectories recursively
         """
         if not os.path.exists(directory_path):
             raise FileNotFoundError(f"Directory '{directory_path}' not found.")
@@ -118,20 +159,17 @@ class TLDRFileCreator:
             # Set default output filename if not provided
             if base_output_filename is None:
                 output_filename = 'tldr_combined.json'
-                # output_filename = os.path.join(root_directory, 'tldr_combined.json')
             else:
                 output_filename = base_output_filename
-                # Ensure the output file is in the base directory
-                # if not os.path.isabs(base_output_filename):
-                #     output_filename = os.path.join(root_directory, base_output_filename)
-                # else:
-                #     output_filename = base_output_filename
-            
+
             timestamp = datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')
 
             # For GitHub repos we don't have a root directory
             if not self.local:
-                abs_root_directory = "GitHub Repository"
+                if self.github_url is not None:
+                    abs_root_directory = self.github_url
+                else:
+                    abs_root_directory = "GitHub Repository (unknown URL)"
 
             combined_content = {
                 "root_directory": abs_root_directory,
@@ -228,49 +266,12 @@ class TLDRFileCreator:
         Returns:
             bool: True if file is a programming language, False otherwise
         """
-        # Common programming file extensions
-        programming_extensions = {
-            '.py', '.pyx', '.pyi',  # Python
-            '.js', '.jsx', '.ts', '.tsx', '.mjs', '.cjs',  # JavaScript/TypeScript
-            '.java', '.kt', '.kts',  # Java/Kotlin
-            '.c', '.h', '.cpp', '.hpp', '.cc', '.cxx', '.c++',  # C/C++
-            '.cs', '.vb',  # C#/VB.NET
-            '.php', '.php3', '.php4', '.php5', '.phtml',  # PHP
-            '.rb', '.rbw',  # Ruby
-            '.go',  # Go
-            '.rs',  # Rust
-            '.swift',  # Swift
-            '.m', '.mm',  # Objective-C
-            '.scala', '.sc',  # Scala
-            '.pl', '.pm', '.pod',  # Perl
-            '.sh', '.bash', '.zsh', '.fish',  # Shell scripts
-            '.ps1', '.psm1', '.psd1',  # PowerShell
-            '.r', '.R',  # R
-            '.matlab', '.m',  # MATLAB
-            '.lua',  # Lua
-            '.dart',  # Dart
-            '.ex', '.exs',  # Elixir
-            '.erl', '.hrl',  # Erlang
-            '.hs', '.lhs',  # Haskell
-            '.clj', '.cljs', '.cljc',  # Clojure
-            '.fs', '.fsx', '.fsi',  # F#
-            '.ml', '.mli',  # OCaml
-            '.pas', '.pp', '.inc',  # Pascal
-            '.ada', '.adb', '.ads',  # Ada
-            '.d',  # D
-            '.nim',  # Nim
-            '.crystal', '.cr',  # Crystal
-            '.zig',  # Zig
-            '.v',  # V
-            '.jl',  # Julia
-            '.groovy', '.gvy', '.gy', '.gsh',  # Groovy
-        }
-        
+
         # Get file extension
         _, ext = os.path.splitext(file_path.lower())
         
         # First check if it has a known programming extension
-        if ext not in programming_extensions:
+        if ext not in self.programming_extensions:
             logging.debug(f"Excluding file {file_path} (unknown programming extension: {ext})")
             return False
         
