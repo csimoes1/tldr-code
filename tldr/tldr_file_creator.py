@@ -112,6 +112,7 @@ class TLDRFileCreator:
         
         # Process each directory in recursive mode
         self._process_directories_recursively(directory_path, output_filename)
+        return output_filename
 
     def _process_directories_recursively(self, root_directory, base_output_filename):
         """
@@ -172,9 +173,9 @@ class TLDRFileCreator:
                     abs_root_directory = "GitHub Repository (unknown URL)"
 
             combined_content = {
-                "root_directory": abs_root_directory,
+                # "root_directory": abs_root_directory,
                 "last_updated": timestamp,
-                "total_directories_processed": processed_count,
+                # "total_directories_processed": processed_count,
                 "directories": all_directories
             }
             
@@ -456,7 +457,8 @@ def main():
     
     try:
         creator = TLDRFileCreator()
-        creator.create_tldr_file(args.directory_path, args.output_filename)
+        output_filename = creator.create_tldr_file(args.directory_path, args.output_filename)
+        print(f"TLDR file created successfully: {output_filename}")
     except Exception as e:
         print(f"Error: {e}")
         sys.exit(1)

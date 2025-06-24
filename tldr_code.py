@@ -112,8 +112,7 @@ def process_local_path(directory_path: str, output_filename: str = None, terse_o
     if output_filename is None:
         output_filename = os.path.join(directory_path, 'tldr.json')
     
-    creator.create_tldr_file(directory_path, output_filename)
-    return output_filename
+    return creator.create_tldr_file(directory_path, output_filename)
 
 def main():
     """

@@ -123,7 +123,8 @@ class GitHubAdapter:
             
             creator = TLDRFileCreator(llm_provider=self.llm_provider, skip_file_summary=self.skip_file_summary,
                                       terse_output=self.terse_output, local=False, github_url=github_url)
-            creator.create_tldr_file(download_path, tldr_filename)
+            output_filename = creator.create_tldr_file(download_path, tldr_filename)
+            logging.info(f"TLDR file created: {output_filename}")
             tldr_end = time.time()
             logging.info(f"TLDR file creation completed in {tldr_end - tldr_start:.2f} seconds")
             
