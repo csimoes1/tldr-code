@@ -152,7 +152,7 @@ class TLDRFileCreator:
                 directory_content = self._generate_json_content(abs_directory_path, programming_files, abs_root_directory)
                 all_directories.append(directory_content)
                 
-                print(f"Processed directory: {abs_directory_path}")
+                # print(f"Processed directory: {abs_directory_path}")
                 processed_count += 1
         
         # Create the combined JSON structure
@@ -182,9 +182,9 @@ class TLDRFileCreator:
             # Write the combined file atomically
             self._write_json_atomically(combined_content, output_filename)
             
-            print(f"Combined TLDR file created: {output_filename}")
+            # print(f"Combined TLDR file created: {output_filename}")
         
-        print(f"Recursive processing complete. Processed {processed_count} directories into one file.")
+        logging.debug(f"Recursive processing complete. Processed {processed_count} directories into one file.")
         
     def _generate_json_content(self, directory_path, files, root_directory=None):
         """
