@@ -105,7 +105,7 @@ class GitHubAdapter:
             # Create output directory if it doesn't exist
             os.makedirs(output_dir, exist_ok=True)
             download_path = os.path.join(output_dir, repo_name)
-            should_cleanup_temp = False
+            should_cleanup_temp = True
         
         try:
             download_start = time.time()
