@@ -4,6 +4,8 @@ We are trying to test tldr against large open source projects.  A good test size
 tldr works fine on larger code bases such as the react project (1G+ in size), but analyzing test cases of this size takes a long time and is not practical for testing purposes.
 Below is a list of projects we are considering for testing.  We are looking for projects that are around 10M-100M in size, but we are also considering smaller projects that are well known and have a good number of functions.
 
+To get the size of a repo on local disk: du -s ./* | grep -v '/\.' | awk '{sum+=$1} END {print sum/1024 " MB"}'
+
 ## Projects considered:
 ### Javascript:
 - React - too large (1G)
@@ -24,10 +26,13 @@ Below is a list of projects we are considering for testing.  We are looking for 
 - whisper.cpp (53M)
 
 ### C:
-
+- redis (41M)
 
 ### C#:
 - PowerShell - (154M)
+
+### Swift:
+- iine (36M) (tested by ChatGPT(A-) and Claude(B+) - Objective C files are poorly covered, swift files covered well)
 
 
 ## Testing with LLMs

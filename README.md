@@ -12,6 +12,11 @@ TLDR is a Python tool that extracts function signatures from large codebases and
 - **Atomic File Writing**: Ensures data integrity with atomic file operations
 - **(Future feature) AI-Powered File Summaries**: Can call out to LLM providers to generate file summaries using  (Claude, OpenAI, Grok)
 
+## Online Version
+
+[![TLDR Code Online](tldr-code-input-image.png)](https://tldr-code.com)
+
+
 ## Supported Languages
 
 JavaScript/TypeScript, Python, Java, C/C++, C#, PHP, Ruby, Go, Rust, Swift, Scala, Kotlin, and many more.
