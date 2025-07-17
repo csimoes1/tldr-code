@@ -16,8 +16,9 @@ TLDR is a Python tool that extracts function signatures from large codebases and
 
 [![TLDR Code Online](tldr-code-input-image.png)](https://tldr-code.com)
 
-## Online Version
-MCP Server added at https://www.tldr-code.com/mcp/
+## MCP Server
+MCP Server available at https://www.tldr-code.com/mcp/
+Allows the client to call tldr_code to summarize a GitHub repo.  This has been tested with Claude Code, but should work with other clients.
 ```bash
 # Example: add to claude code
 claude mcp add --transport http tldr_code https://www.tldr-code.com/mcp/
